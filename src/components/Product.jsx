@@ -1,6 +1,8 @@
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { addToCart, deleteItem } from "../store/cartSlice"; // Updated import
+import { addToCart } from "../store/cartSlice";
+import { ShoppingCart, ShoppingBag } from "lucide-react";
 
 const Product = ({ item }) => {
   const navigate = useNavigate();
@@ -11,13 +13,11 @@ const Product = ({ item }) => {
       console.error("Product item is invalid", item);
       return;
     }
-    // Pass the full item object to addToCart
     dispatch(addToCart(item));
   };
 
   const handleOnAddToCart = (item) => {
-    console.log("Adding to cart:", item); // Add this line
-    // Pass the full item object to addToCart
+    console.log("Adding to cart:", item);
     dispatch(addToCart(item));
   };
 
@@ -25,43 +25,54 @@ const Product = ({ item }) => {
     navigate(`/product/${id}`);
   };
 
+  console.log(item);
+
   return (
-    <div key={item._id} className="p-4 md:w-1/3">
-      <div className="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden">
-        <img
-          className="lg:h-48 md:h-36 w-full object-cover object-center cursor-pointer"
-          src={item.images[0]?.url || "https://via.placeholder.com/150"}
-          alt={item.name}
-          onClick={() => handleOnOpen(item._id)}
-        />
+    <div className="p-4 md:w-1/3">
+      <div className="group h-full bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
+        <div className="relative overflow-hidden">
+          <img
+            className="w-full h-64 object-cover object-center transform group-hover:scale-105 transition-transform duration-500 cursor-pointer"
+            src={item.images[0]?.url || "/api/placeholder/400/400"}
+            alt={item.name}
+            onClick={() => handleOnOpen(item._id)}
+          />
+          <div className="absolute top-4 right-4">
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+              {item.category.toUpperCase()}
+            </span>
+          </div>
+        </div>
+
         <div className="p-6">
-          <h2 className="tracking-widest text-xs title-font font-medium text-gray-400 mb-1">
-            {item.category.toUpperCase()}
-          </h2>
-          <h1 className="title-font text-lg font-medium text-gray-900 mb-3">
-            {item.name}
-          </h1>
-          <p className="leading-relaxed mb-3">
-            {item.description.length > 100
-              ? `${item.description.substring(0, 100)}...`
-              : item.description}
-          </p>
-          <p className="text-lg font-semibold text-gray-900 mb-2">
-            ₹{item.price}
-          </p>
-          <div className="flex items-center flex-wrap">
-            <div>
-              <button
-                className="bg-zinc-700 text-white px-6 py-3 rounded-lg hover:bg-yellow-600 transition"
-                onClick={() => handleOnBuy(item)}
-              >
-                Buy Now
-              </button>
+          <div className="mb-4">
+            <h1 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors">
+              {item.name}
+            </h1>
+            <p className="text-gray-600 text-sm line-clamp-2">
+              {item.description}
+            </p>
+          </div>
+
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-2xl font-bold text-gray-900">
+              ₹{item.price.toLocaleString()}
             </div>
+          </div>
+
+          <div className="flex items-center gap-2">
             <button
-              className="ml-2 text-indigo-500 border border-indigo-500 py-2 px-4 rounded text-sm hover:bg-indigo-100"
-              onClick={() => handleOnAddToCart(item)}
+              onClick={() => handleOnBuy(item)}
+              className="flex items-center gap-2 bg-gradient-to-r from-green-400 to-blue-500 text-white font-semibold py-3 px-6 rounded-lg hover:opacity-90 transition-opacity"
             >
+              <ShoppingBag className="w-4 h-4" />
+              Buy Now
+            </button>
+            <button
+              onClick={() => handleOnAddToCart(item)}
+              className="flex items-center justify-center gap-2 text-indigo-600 border-2 border-indigo-600 py-2.5 px-4 rounded-lg hover:bg-indigo-50 transition-colors duration-300"
+            >
+              <ShoppingCart className="w-4 h-4" />
               Add to Cart
             </button>
           </div>

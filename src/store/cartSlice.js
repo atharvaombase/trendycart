@@ -1,45 +1,60 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+/**
+ * Slice for managing the cart state.
+ * The state is an array of objects, each representing an item in the cart.
+ * Each item has an _id, name, price, and quantity.
+ */
 const cartSlice = createSlice({
   name: "cart",
-  initialState: [],
+  initialState: [], // Initial state is an empty array.
   reducers: {
+    /**
+     * Adds an item to the cart.
+     * If the item already exists in the cart, increments its quantity.
+     * Otherwise, adds a new item to the cart with a quantity of 1.
+     */
     addToCart: (state, action) => {
-      // console.log("addToCart action received:", action); // Add this line
-      const existingItem = state.find(item => item._id === action.payload._id);
+      const existingItem = state.find((item) => item._id === action.payload._id);
       if (existingItem) {
         existingItem.quantity += 1;
       } else {
         state.push({ ...action.payload, quantity: 1 });
       }
     },
+    /**
+     * Deletes an item from the cart by its _id.
+     */
     deleteItem: (state, action) => {
-      // console.log("deleteItem action received:", action.payload); // Add this line
-      return state.filter(item => item._id !== action.payload);
+      return state.filter((item) => item._id !== action.payload);
     },
+    /**
+     * Increments the quantity of an item in the cart by its _id.
+     */
     incrementItem: (state, action) => {
-      console.log("incrementItem action received:", action.payload); // Add this line
-      const existingItem = state.find(item => item._id === action.payload);
+      const existingItem = state.find((item) => item._id === action.payload);
       if (existingItem) {
         existingItem.quantity += 1;
       }
     },
+    /**
+     * Decrements the quantity of an item in the cart by its _id.
+     * If the quantity is 1, removes the item from the cart.
+     */
     decrementItem: (state, action) => {
-      console.log("decrementItem action received:", action.payload); // Add this line
-      const existingItem = state.find(item => item._id === action.payload);
-      if (existingItem.quantity <= 1) {
-        // dispatch(deleteItem(state, action))
-        return state = state.filter(item => item._id !== action.payload);
-      }
+      const existingItem = state.find((item) => item._id === action.payload);
       if (existingItem) {
-        existingItem.quantity -= 1;
+        if (existingItem.quantity > 1) {
+          existingItem.quantity -= 1;
+        } else {
+          return state.filter((item) => item._id !== action.payload);
+        }
       }
     },
   },
 });
 
-// Named exports for actions
 export const { addToCart, deleteItem, incrementItem, decrementItem } = cartSlice.actions;
 
-// Default export for reducer
 export default cartSlice.reducer;
+

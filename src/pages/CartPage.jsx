@@ -4,86 +4,77 @@ import EmptyCartMessage from "../components/EmptyCartMessage";
 import { decrementItem, deleteItem, incrementItem } from "../store/cartSlice";
 
 const CartPage = () => {
-  // Get all products from the Redux store.
-  const cartItems = useSelector((store) => store.cart);
+  const cart = useSelector((state) => state.cart);
   const dispatch = useDispatch();
 
-  console.log(
-    "wef",
-    useSelector((store) => store.cart)
+  const handleRemoveItem = React.useCallback(
+    (id) => dispatch(deleteItem(id)),
+    [dispatch]
   );
-  // Check if 'item' exists and is an array.
-  // Then filter products: only keep products whose _id is in the 'item' array.
 
-  const handleOnRemove = (id) => {
-    dispatch(deleteItem(id));
-  };
-  const handleOnIncrement = (id) => {
-    dispatch(incrementItem(id));
-  };
-  const handleOnDecrement = (id) => {
-    dispatch(decrementItem(id));
-  };
-
-  // Calculate totals using the cartItems.
-  const subtotal = cartItems.reduce(
-    (total, product) => total + product.price * product.quantity,
-    0
+  const handleIncrementItem = React.useCallback(
+    (id) => dispatch(incrementItem(id)),
+    [dispatch]
   );
-  const tax = subtotal * 0.1; // Assuming 10% tax.
-  const total = subtotal + tax;
+
+  const handleDecrementItem = React.useCallback(
+    (id) => dispatch(decrementItem(id)),
+    [dispatch]
+  );
+
+  const subtotal = React.useMemo(
+    () => cart.reduce((total, item) => total + item.price * item.quantity, 0),
+    [cart]
+  );
+
+  const tax = React.useMemo(() => subtotal * 0.1, [subtotal]);
+
+  const total = React.useMemo(() => subtotal + tax, [subtotal, tax]);
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* <h1 className="text-2xl font-bold mb-8">Your Cart</h1> */}
-      <div className="grid md:grid-cols-3 gap-8">
-        {/* If there are items in the cart, list them; otherwise, show an empty state icon */}
-        <div className="md:col-span-2">
-          {cartItems.length > 0 ? (
-            cartItems.map((product) => (
+      <h1 className="text-2xl font-bold mb-8">Your Cart</h1>
+      {cart.length > 0 ? (
+        <div className="grid md:grid-cols-3 gap-8">
+          <div className="md:col-span-2">
+            {cart.map((item) => (
               <div
-                key={product._id}
+                key={item._id}
                 className="flex items-center gap-4 py-4 border-b"
               >
                 <img
-                  src={product.image || "/placeholder.svg"}
-                  alt={product.name}
+                  src={item.image || "/placeholder.svg"}
+                  alt={item.name}
                   className="w-24 h-24 object-cover rounded-md"
                 />
                 <div className="flex-grow">
-                  <h2 className="font-semibold">{product.name}</h2>
+                  <h2 className="font-semibold">{item.name}</h2>
                   <p className="text-sm text-gray-500">
-                    Rs. {product.price.toFixed(2)}
+                    Rs. {item.price.toFixed(2)}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-1 px-2 rounded-l"
-                    onClick={() => {
-                      handleOnDecrement(product._id);
-                    }}
+                    onClick={() => handleDecrementItem(item._id)}
                   >
                     -
                   </button>
                   <input
                     type="number"
-                    value={product.quantity}
+                    value={item.quantity}
                     className="w-16 h-8 text-center border border-gray-300 rounded"
                   />
                   <button
                     className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-1 px-2 rounded-r"
-                    onClick={() => {
-                      handleOnIncrement(product._id);
-                    }}
+                    onClick={() => handleIncrementItem(item._id)}
                   >
                     +
                   </button>
                 </div>
                 <button
                   className="text-red-500 hover:text-red-700"
-                  onClick={() => {
-                    handleOnRemove(product._id);
-                  }}
+                  onClick={() => handleRemoveItem(item._id)}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -101,41 +92,36 @@ const CartPage = () => {
                   </svg>
                 </button>
               </div>
-            ))
-          ) : (
-            <div className="flex items-center justify-center py-8">
-              {/* <FaBatteryEmpty size={40} /> */}
-              <EmptyCartMessage></EmptyCartMessage>
-              {/* <span className="ml-4 text-gray-500">Your cart is empty!</span> */}
-            </div>
-          )}
-        </div>
+            ))}
+          </div>
 
-        {/* Order Summary Section */}
-        <div>
-          <div className="bg-gray-50 p-6 rounded-lg">
-            <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span>Rs. {subtotal.toFixed(2)}</span>
+          <div>
+            <div className="bg-gray-50 p-6 rounded-lg">
+              <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>Rs. {subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Tax</span>
+                  <span>Rs. {tax.toFixed(2)}</span>
+                </div>
+                <hr className="my-2" />
+                <div className="flex justify-between font-semibold">
+                  <span>Total</span>
+                  <span>Rs. {total.toFixed(2)}</span>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span>Tax</span>
-                <span>Rs. {tax.toFixed(2)}</span>
-              </div>
-              <hr className="my-2" />
-              <div className="flex justify-between font-semibold">
-                <span>Total</span>
-                <span>Rs. {total.toFixed(2)}</span>
-              </div>
+              <button className="w-full mt-4 bg-gradient-to-r from-green-400 to-blue-500 text-white font-bold py-2 px-4 rounded">
+                Proceed to Checkout
+              </button>
             </div>
-            <button className="bg-gradient-to-r from-green-400 to-blue-500 text-white font-bold py-2 px-4 rounded">
-              Proceed to Checkout
-            </button>
           </div>
         </div>
-      </div>
+      ) : (
+        <EmptyCartMessage />
+      )}
     </div>
   );
 };
